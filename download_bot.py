@@ -1,49 +1,43 @@
-from tkinter import *
+
+# import os
+#
+#
+# def create_file():
+#     f = open("guru99.txt", "w+")
+#     os.mkdir('pizza_pictures')
+#     f.close()
+#
+#
+# create_file()
 
 
-# Creating an instance of Tk initializes this interpreter and creates the root window.
-# I don`t have to call tkinter it later
-root = Tk()
-# This allows to make the input box
-e = Entry(root)
-# All the images that are used
-photo = PhotoImage(file="machine-learning.png", )
+import requests
+import bs4
+import os
 
 
-# The main framework (all the windows)
-# Stats = Label(root, width=15, height=50, bg="blue") to tutaj to przykładowe okienko
-# Stats.pack(side=LEFT)
-
-label = Label(root, image=photo, width=800, height=450, bg="black")
-label.pack()
+def pobieracz_obrazow(adres):
+    strona = requests.get(adres)
+    parser = bs4.BeautifulSoup(strona.text, 'html.parser')
+    return parser.find_all('img')
 
 
-topFrame = Frame(root)
-topFrame.pack()
-bottomFrame = Frame(root)
-bottomFrame.pack(side=BOTTOM, expand="yes")
-root.configure(width=1000, height=400,)
-root.configure(bg="black")
+def zapisywacz_obrazow(adres):
+    try:
+        os.mkdir('obrazki')
+    except:
+        pass
+    strona = requests.get(adres)
+    parser = bs4.BeautifulSoup(strona.text, 'html.parser')
+    obrazki = parser.find_all('img')
 
-
-# the main text box that is changing
-introduction = Label(root, font=("Courier", 15), width=80, height=10, bg="black", fg="white",
-                     text=" Wpisz szukane hasło: ________  ")
-e.pack()
-introduction.pack()
-
-
-# exit and the buttons
-button2 = Button(bottomFrame, width=35, height=1, text="Zamknij", fg="red", command=root.destroy)
-button2.pack(side=BOTTOM)
-
-
-button1 = Button(bottomFrame, width=35, height=1,
-                 text="pobieraj", fg="blue",
-                 command="pass")
-button1.pack(side=BOTTOM, )
-
-
-root.mainloop()
+    for obrazek in obrazki:
+       adres_obrazka = obrazek.get('src')
+       nazwa_obrazka = obrazek.get('alt')
+       if nazwa_obrazka is not None:
+            nazwa_obrazka = nazwa_obrazka.replace(' ', '-').replace('/', '')
+            with open(f'obrazki/{nazwa_obrazka}.jpg', 'wb') as jpg:
+                dane_obrazka = requests.get(adres_obrazka).content
+                jpg.write(dane_obrazka)
 
 
